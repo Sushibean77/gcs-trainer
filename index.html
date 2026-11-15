@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f5fbf">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GCS Trainer">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>GCS Trainer</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#14171c;--mute:#5d6672;--line:#dde1e6;--acc:#1f5fbf;--ok:#1d7a46;--bad:#b42318;--okbg:#e7f5ec;--badbg:#fdecea;--sel:#1f5fbf}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#e8eaed;--mute:#9aa3ad;--line:#2b3038;--acc:#6ea0f0;--ok:#4cc483;--bad:#f07167;--okbg:#14301f;--badbg:#3a1714;--sel:#6ea0f0}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:720px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+body{-webkit-text-size-adjust:100%}button{touch-action:manipulation}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1{font-size:19px;margin:4px 0}
+.stats{display:flex;gap:6px;flex-wrap:wrap}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--mute)}
+.pill b{color:var(--ink)}
+.bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.tab{padding:8px 4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
+.tab.on{border-color:var(--acc);color:var(--acc);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.pt{font-size:13px;color:var(--mute)}
+.num{font-size:12px;color:var(--mute);white-space:nowrap}
+.timer{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 8px}
+.timer i{display:block;height:100%;background:var(--acc);width:100%}
+.timer.low i{background:var(--bad)}
+.tleft{font-size:12px;color:var(--mute);text-align:right;margin-top:-4px}
+.vig p{margin:8px 0}
+.vig .tag{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--mute)}
+.qq{font-size:16px;font-weight:600;margin:4px 0 2px}
+.comp{margin-top:12px}
+.comp h3{font-size:14px;margin:0 0 6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.opts.q{grid-template-columns:1fr}
+.opt{text-align:left;padding:9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;font:inherit;font-size:13px;line-height:1.3}
+.opt b{display:inline-block;min-width:24px}
+.opt.sel{border-color:var(--sel);box-shadow:inset 0 0 0 1px var(--sel)}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt:disabled{cursor:default}
+.actions{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;padding:11px;border-radius:9px;border:0;background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.sec{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+.btn:disabled{opacity:.4;cursor:default}
+.fb{margin-top:12px;border-radius:10px;padding:10px 12px;font-size:14px}
+.fb.ok{background:var(--okbg)}
+.fb.bad{background:var(--badbg)}
+.fb ul{margin:6px 0 0;padding-left:18px}
+.fb li{margin:4px 0}
+.total{font-size:17px;font-weight:700}
+.tout{color:var(--bad);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--mute);font-weight:600;white-space:nowrap}
+.ref h2{font-size:15px;margin:16px 0 4px}
+.ref h2:first-child{margin-top:0}
+.ref ul,.ref ol{padding-left:18px;margin:4px 0;font-size:13px}
+.ref li{margin:3px 0}
+.ref a{color:var(--acc)}
+.acc{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.acc div{background:var(--bg);border-radius:8px;padding:6px 2px;text-align:center;font-size:11px;color:var(--mute)}
+.acc div b{display:block;font-size:14px;color:var(--ink)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+select{font:inherit;font-size:13px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.link{background:none;border:0;color:var(--acc);font:inherit;font-size:13px;cursor:pointer;padding:0}
+.hidden{display:none}
+.small{font-size:12px;color:var(--mute)}
+.done{text-align:center}
+.done .big{font-size:34px;font-weight:800;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>GCS Trainer</h1>
+  <div class="stats">
+    <span class="pill">Answered <b id="sN">0</b></span>
+    <span class="pill">Correct <b id="sP">–</b></span>
+    <span class="pill">Streak <b id="sS">0</b></span>
+  </div>
+</header>
+
+<div class="bar">
+  <button class="tab on" data-mode="full">Cases</button>
+  <button class="tab" data-mode="single">One part</button>
+  <button class="tab" data-mode="quiz">Rules quiz</button>
+  <button class="tab" data-mode="ref">Reference</button>
+</div>
+
+<div id="train">
+  <div class="card" id="caseCard">
+    <div class="top"><div class="pt" id="pt"></div><div class="num" id="num"></div></div>
+    <div id="timerWrap" class="hidden"><div class="timer" id="timer"><i id="tbar"></i></div><div class="tleft" id="tleft"></div></div>
+    <div class="vig" id="vig"></div>
+    <div id="comps"></div>
+    <div id="fb"></div>
+    <div class="actions">
+      <button class="btn" id="submit" disabled>Check</button>
+      <button class="btn sec hidden" id="next">Next →</button>
+    </div>
+  </div>
+  <div class="card done hidden" id="doneCard">
+    <div class="small" id="dTitle"></div>
+    <div class="big" id="dScore"></div>
+    <div class="small" id="dDetail"></div>
+    <div class="actions"><button class="btn" id="again">Reshuffle &amp; restart</button><button class="btn sec" id="revBtn">Review missed</button></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <label>Deck
+        <select id="fsel">
+          <option value="all">All</option><option value="edge">Pitfalls only</option><option value="miss">Missed only</option>
+        </select>
+      </label>
+      <label>Timer
+        <select id="tsel">
+          <option value="0">Off</option><option value="10">10 s</option><option value="20">20 s</option>
+          <option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="auto"> Auto-advance</label>
+      <button class="link" id="reset">Reset session</button>
+    </div>
+    <div class="acc">
+      <div>Eye<b id="aE">–</b></div>
+      <div>Verbal<b id="aV">–</b></div>
+      <div>Motor<b id="aM">–</b></div>
+      <div>Rules<b id="aQ">–</b></div>
+      <div>Avg time<b id="aT">–</b></div>
+    </div>
+    <div class="small" id="weak" style="margin-top:8px"></div>
+    <div class="small" style="margin-top:6px">Timer runs per item and pauses on the Reference tab. Time-out marks blank answers wrong. Missed items stay in the “Missed only” deck until answered correctly. Progress is saved on this device.</div>
+  </div>
+</div>
+
+<div id="ref" class="card ref hidden">
+  <h2>1 · Method: Check → Observe → Stimulate → Rate</h2>
+  <ul>
+    <li><b>Check</b> for factors interfering with communication, ability to respond, and other injuries.</li>
+    <li><b>Observe</b> eye opening, content of speech, movements of right and left sides.</li>
+    <li><b>Stimulate</b>: sound (spoken or shouted request), then pressure: fingertip → trapezius pinch → supraorbital notch.</li>
+    <li><b>Rate</b> the highest response observed.</li>
+    <li>Sternal rub: strongly discouraged by the scale's authors. Pressure behind the jaw: not recommended for routine use.</li>
+    <li>ACS 2024: note whether the stimulus was central or peripheral and keep using the same one on repeat exams.</li>
+  </ul>
+
+  <h2>2 · Eye opening (E)</h2>
+  <table><tr><th>4</th><td>Spontaneous — open before stimulus</td></tr><tr><th>3</th><td>To sound — after spoken or shouted request</td></tr><tr><th>2</th><td>To pressure — after fingertip stimulus</td></tr><tr><th>1</th><td>None — no opening at any time, no interfering factor</td></tr><tr><th>NT</th><td>Closed by local factor (swelling, dressings)</td></tr></table>
+
+  <h2>3 · Verbal response (V)</h2>
+  <table><tr><th>5</th><td>Orientated — correctly gives name, place and date</td></tr><tr><th>4</th><td>Confused — not orientated but communicates coherently</td></tr><tr><th>3</th><td>Words — intelligible single words</td></tr><tr><th>2</th><td>Sounds — only moans / groans</td></tr><tr><th>1</th><td>None — no audible response, no interfering factor</td></tr><tr><th>NT</th><td>Factor interfering with communication (tube, tracheostomy, dysphasia, unbridged language barrier)</td></tr></table>
+
+  <h2>4 · Best motor response (M)</h2>
+  <table><tr><th>6</th><td>Obeys commands — obeys a two-part request</td></tr><tr><th>5</th><td>Localising — brings hand above clavicle to stimulus on head/neck</td></tr><tr><th>4</th><td>Normal flexion — bends arm at elbow rapidly, features not predominantly abnormal</td></tr><tr><th>3</th><td>Abnormal flexion — bends arm at elbow, features clearly predominantly abnormal</td></tr><tr><th>2</th><td>Extension — extends arm at elbow</td></tr><tr><th>1</th><td>None — no movement in arms/legs, no interfering factor</td></tr><tr><th>NT</th><td>Paralysed or other limiting factor</td></tr></table>
+  <table style="margin-top:8px"><tr><th>Normal flexion</th><th>Abnormal flexion</th></tr><tr><td>Rapid, variable; arm moves away from body</td><td>Slow, stereotyped; arm across chest; forearm rotates; thumb clenched; leg extends</td></tr></table>
+  <ul><li>ACS 2024: rate the best <i>arm</i>; leg responses are not recorded for the motor rating.</li></ul>
+
+  <h2>5 · Interfering factors and NT</h2>
+  <ul>
+    <li><b>Pre-existing:</b> language/cultural differences, intellectual or neurological deficit, hearing loss, speech impediment → adapt (interpreter, written questions).</li>
+    <li><b>Current treatment:</b> intubation/tracheostomy → verbal NT. Sedation or paralysis → wake-up test where safe; otherwise NT.</li>
+    <li><b>Other injuries:</b> orbital/cranial fracture, dysphasia, hemiplegia, spinal cord damage. With cord injury, test requests using tongue and eye movements.</li>
+    <li>Never record a missing component as 1. Do not report a total when any component is NT; trend the remaining components.</li>
+    <li>Alcohol, drugs, post-ictal state, dementia: rate what you observe and document the confounder. A wrong orientation answer is “confused” whatever the cause.</li>
+  </ul>
+
+  <h2>6 · Common errors</h2>
+  <ul>
+    <li>Eyes opening to “open your eyes” → E3, not E4.</li>
+    <li>Name and place right, month wrong → V4.</li>
+    <li>Grip without release on request → not proof of M6.</li>
+    <li>Asymmetry → rate the better side; record the deficit separately.</li>
+    <li>Arm pulls away but hand stays below the clavicle → M4, not M5.</li>
+    <li>Slurred but correct answers → V5.</li>
+  </ul>
+
+  <h2>7 · Reporting and what the numbers are used for</h2>
+  <ul>
+    <li>Individual patient: report components, e.g. “E3 V4 M5”. The sum is for classification and group comparison (ACS 2024).</li>
+    <li>Conventional bands: 13–15 mild, 9–12 moderate, ≤8 severe. ACS 2024 calls this an overly simplistic, one-dimensional approximation.</li>
+    <li>Airway (ATLS): GCS ≤8 usually needs a definitive airway.</li>
+    <li>Transport (ACS 2024): motor &lt;6 or GCS &lt;13 with suspected TBI → highest-level trauma centre. 2021 US field triage red criterion: unable to follow commands (motor &lt;6).</li>
+    <li>ICP monitoring (ACS 2024): GCS ≤8 with structural damage on initial CT; others case by case.</li>
+    <li>Deterioration (GCS authors, citing NICE): urgent reappraisal for a sustained (≥30 min) 1-point drop, a drop of ≥3 in eye or verbal, or ≥2 in motor. Motor changes carry most weight.</li>
+  </ul>
+
+  <h2>8 · Pupils and GCS-P</h2>
+  <ul>
+    <li>Pupil reactivity score: both unreactive 2, one unreactive 1, neither 0.</li>
+    <li>GCS-P = GCS sum − pupil reactivity score; range 1–15. Example: E1 V1 M4 (6), both pupils fixed → GCS-P 4.</li>
+    <li>It adds prognostic information and does not replace separate reporting of components and pupils.</li>
+    <li>2025 NINDS clinical working group: record pupils in every patient, separately from the GCS.</li>
+  </ul>
+
+  <h2>9 · Children</h2>
+  <ul>
+    <li>GCS authors: standard scale unchanged over age 5. ACS 2024: paediatric GCS is more reliable for ages 0–2.</li>
+    <li>One widely used infant modification (wording varies between versions):</li>
+  </ul>
+  <table><tr><th></th><th>Verbal (infant)</th><th>Motor (infant)</th></tr>
+  <tr><th>6</th><td></td><td>Moves spontaneously and purposefully</td></tr>
+  <tr><th>5</th><td>Coos and babbles</td><td>Withdraws to touch</td></tr>
+  <tr><th>4</th><td>Irritable cries</td><td>Withdraws to pain</td></tr>
+  <tr><th>3</th><td>Cries to pain</td><td>Abnormal flexion</td></tr>
+  <tr><th>2</th><td>Moans to pain</td><td>Extension</td></tr>
+  <tr><th>1</th><td>None</td><td>None</td></tr></table>
+
+  <h2>10 · Beyond mild / moderate / severe</h2>
+  <ul><li>2025 NIH-NINDS CBI-M framework: Clinical (full GCS + pupils), Biomarker, Imaging, Modifiers. Still being validated; the GCS components remain its clinical core.</li></ul>
+
+  <h2>Sources</h2>
+  <ol>
+    <li><a href="https://www.glasgowcomascale.org/downloads/GCS-Assessment-Aid-English.pdf">GCS “Do it this way” assessment aid</a> (Teasdale, 2015)</li>
+    <li><a href="https://www.glasgowcomascale.org/faq/">glasgowcomascale.org FAQ</a> and <a href="https://www.glasgowcomascale.org/self-test-answers">self-test answers</a></li>
+    <li><a href="https://glasgowcomascale.org/what-is-gcs-p/">GCS-Pupils score</a> (Brennan, Murray, Teasdale, J Neurosurg 2018)</li>
+    <li><a href="https://ww2.facs.org/media/vgfgjpfk/best-practices-guidelines-traumatic-brain-injury.pdf">ACS Best Practices Guidelines: Management of TBI</a> (2024)</li>
+    <li><a href="https://ww2.facs.org/media/2zdltley/field-triage-handout-vfinal-revise.pdf">National Guideline for the Field Triage of Injured Patients</a> (2021)</li>
+    <li><a href="https://doi.org/10.1016/S1474-4422(25)00154-1">Manley et al., Lancet Neurol 2025</a> (CBI-M)</li>
+    <li>Teasdale et al., Lancet Neurol 2014;13:844–54. ATLS, American College of Surgeons.</li>
+  </ol>
+  <p class="small">Study aid only; not a substitute for local protocols or supervised bedside training. The ATLS 11th edition manual could not be checked directly; the airway statement reflects long-standing ATLS teaching.</p>
+</div>
+</div>
+
+<script>
+function C(p,e,E,v,V,m,M,n){n=n||{};return{p,edge:!!(n.e||n.v||n.m)||[E,V,M].includes("NT"),items:{E:[e,E,n.e],V:[v,V,n.v],M:[m,M,n.m]}};}
+function Q(q,o,a,x,s){return{q,o,a,x,s};}
+// Motor phrasing follows the GCS authors' aid: localising = hand above clavicle; normal flexion = rapid, arm away from body;
+// abnormal flexion = slow, stereotyped, arm across chest, forearm rotates, thumb clenched, leg extends; extension = arm extends at elbow.
+const NC="Does not respond to requests. ";
+const M6a="Squeezes your fingers and lets go again when asked.";
+const M6b="Holds up two fingers, then makes a fist, on request.";
+const M6c="Raises both arms and then sticks out the tongue when asked.";
+const M5a=NC+"Trapezius pinch: a hand comes up above the clavicle and grasps yours.";
+const M5b=NC+"Supraorbital pressure: a hand rises to the forehead and pushes yours away.";
+const M4a=NC+"Fingertip pressure: the elbow bends briskly and the arm pulls away from the body. Trapezius pinch: the hand never rises above the clavicle.";
+const M4b=NC+"To trapezius and supraorbital pressure the elbows bend quickly, arms moving out from the body, but neither hand reaches the neck or head.";
+const M3a=NC+"Trapezius pinch: the elbows bend slowly, forearms drawn across the chest, thumbs clenched in the fists, legs straightening.";
+const M3b=NC+"Each stimulus produces the same slow movement: elbows flex, forearms rotate and cross the chest, legs extend.";
+const M2a=NC+"Trapezius pinch: both arms straighten at the elbow.";
+const M2b=NC+"Supraorbital pressure: the arms extend at the elbows; no bending at any time.";
+const M1a="No movement of arms or legs to fingertip, trapezius or supraorbital pressure. No paralytic given.";
+const E4a="Eyes open and watching you before you say anything.";
+const E4b="Eyes already open, following staff around the room.";
+const E3a="Eyes closed; they open when you say the patient's name.";
+const E3b="Eyes closed to normal speech; they open when you shout.";
+const E2a="Eyes stay closed when you shout; they open with fingertip pressure.";
+const E2b="No eye opening to voice; eyes open during fingertip pressure and close again after.";
+const E1a="Eyes stay closed despite shouting and fingertip pressure. Lids are not swollen.";
+const V5a="Gives name, the hospital and the current month correctly.";
+const V5b="Tells you their name, where they are and today's date, all correct.";
+const V2a="Moans and groans; no recognisable words.";
+const V1a="No sound at any time, including during pressure. Not intubated.";
+const VT="Orally intubated.";
+
+const CASES=[
+C("24F, thrown from horse, helmeted.",E4a,"4",V5a,"5",M6a,"6"),
+C("58M, rear-ended at a traffic light.",E3a,"3","Speaks in full sentences but says it is 2015 and that he is at work.","4",M6b,"6"),
+C("71F on warfarin, fall at nursing home.",E3b,"3","Says only 'go away… hurts…' — isolated words, no sentences.","3",M5a,"5"),
+C("35M, assaulted with a baseball bat.",E2a,"2",V2a,"2",M4a,"4"),
+C("19M, motorcycle vs. truck, unhelmeted.",E1a,"1",V1a,"1",M2a,"2"),
+C("82M, found down at home, unknown downtime.",E1a,"1",V1a,"1",M1a,"1"),
+C("44F, intubated by EMS for agitation; paralytic given 2 h ago, train-of-four 4/4, no sedation running.",E2a,"2",VT,"NT","Does not respond to requests. Repeatedly brings a hand up to the mouth and grabs the endotracheal tube.","5",{v:"Intubation prevents speech → verbal NT (often written VT). Never record 1 for a component that cannot be tested.",m:"Hand brought above the clavicle to a stimulus on the head/neck (the tube) → localising."}),
+C("29M, punched repeatedly in the face.","Both eyelids massively swollen; neither eye can be opened, even by you.","NT","Talks in sentences; believes he is at a friend's flat.","4",M6c,"6",{e:"Eyes closed by a local factor → NT, not 1."}),
+C("66F, known severe expressive aphasia from an old stroke; new fall.",E4a,"4","Clearly attending to you but produces no speech; this is her documented baseline.","NT","Left hand squeezes and releases on request. Right arm does not move (old hemiplegia).","6",{v:"Dysphasia is a factor interfering with communication → verbal NT, not 1.",m:"Rate the best response: the left arm obeys → M6. Hemiplegia is recorded separately."}),
+C("53M, rocuronium given 5 min ago for intubation.","Eyes closed; no response to any stimulus.","NT",VT,"NT","No movement to any stimulus.","NT",{e:"Under neuromuscular blockade the eyelids cannot open either → NT. Nothing can be rated until the paralytic wears off.",v:"Intubated and paralysed → NT.",m:"Paralysed → motor NT, not M1."}),
+C("31F, cyclist struck by a car door.",E4b,"4",V5b,"5",M6b,"6"),
+C("77M, new confusion on post-op day 2.",E4b,"4","Chats freely but insists he is at his daughter's house and that it is 1998.","4",M6a,"6"),
+C("45M, fall from scaffold, about 4 m.","Eyes closed; they open when you say 'open your eyes'.","3","Repeats 'no… stop…' only.","3",M5b,"5",{e:"Opening after a spoken or shouted request is 'to sound' (E3). E4 requires eyes open before any stimulus."}),
+C("17F, ejected from a rolled SUV.",E2b,"2",V2a,"2",M3a,"3"),
+C("62M, suspected ruptured aneurysm.",E1a,"1",V1a,"1",NC+"Trapezius pinch: the left arm straightens at the elbow; the right elbow bends slowly with the forearm drawn across the chest and thumb clenched.","3",{m:"Rate the best side: abnormal flexion (3) is better than extension (2). Document the asymmetry."}),
+C("38F, overdose of unknown tablets.",E2a,"2","Mumbles sounds you cannot make out as words.","2",M5b,"5"),
+C("49M, smells of alcohol, fell down stairs.",E3b,"3","Swears in single words; no sentences.","3",M5a,"5",{v:"Rate what you observe, whatever the suspected cause, and document the alcohol. Do not add points for intoxication."}),
+C("86F, known dementia, fall from bed.",E4a,"4","Converses in sentences but cannot say where she is or what year it is.","4",M6a,"6",{v:"Any wrong orientation answer → confused, whatever the cause. Note the baseline dementia beside the rating."}),
+C("26M, gunshot wound to the head.",E1a,"1",V1a,"1",M2b,"2"),
+C("54F, post-cardiac arrest, ROSC 6 h ago; no sedation, paralytic only at induction 6 h ago.",E1a,"1",VT,"NT",M1a,"1",{v:"Intubated → verbal NT.",m:"No sedation or active paralytic, so absent movement is a true M1."}),
+C("40M, hit by a falling branch.",E4a,"4",V5b,"5",M6c,"6"),
+C("68M, subdural on CT, getting drowsier.",E3b,"3","Answers in sentences but gives the wrong town and the wrong year.","4","No longer does what you ask. Supraorbital pressure: his hand comes up to his brow and grips yours.","5"),
+C("22F, diving injury, suspected high cervical cord injury, collar on.",E4a,"4",V5a,"5","No movement in arms or legs. On request she sticks out her tongue, then looks left and right.","6",{m:"With spinal cord damage the GCS authors advise adapting the exam to tongue and eye movements. She obeys a two-part request → M6. Limb paralysis is recorded separately."}),
+C("75F, minor collision, glucose 2.1 mmol/L.",E2a,"2","Says 'cold… no…' — single words.","3",M5a,"5"),
+C("33M, generalised seizure 10 min ago.",E3a,"3",V2a,"2",M4a,"4"),
+C("59F, long-term tracheostomy and ventilation, new fever.",E4b,"4","Tracheostomy with inflated cuff; mouths words silently.","NT",M6a,"6",{v:"Tracheostomy prevents voice → verbal NT."}),
+C("47M, suspected opioid overdose, before naloxone.",E1a,"1","Snoring breaths only; no vocal response to pressure. Not intubated.","1",M4b,"4"),
+C("47M, the same patient 3 min after naloxone.",E4a,"4","Angry, full sentences; gives his name, the hospital and the date correctly.","5","Sits up; on request raises his right hand and then puts it down.","6"),
+C("63F, sudden worst-ever headache, then collapse.",E2b,"2",V2a,"2",M3b,"3"),
+C("80M on a DOAC, slow decline over 2 days.",E4a,"4","Rambles in sentences about the war; wrong place, wrong year.","4","Grips your fingers when they touch his palm but does not let go when asked, and does nothing else on request. Trapezius pinch: his hand comes up over the clavicle to yours.","5",{m:"A grip without release on request can be a grasp reflex, not obeying. A two-part request is needed for M6. Hand above clavicle → localising."}),
+C("28M, pedestrian struck; intubated at scene, paralytic worn off, no sedation.",E2a,"2",VT,"NT",M2a,"2",{v:"Intubated → verbal NT."}),
+C("36F, eclamptic seizure 30 min ago.",E3a,"3","Speaks in sentences; does not know the date or which hospital this is.","4",M6b,"6"),
+C("91F, hip fracture, agitated.",E4b,"4","Shouts single words — 'nurse!… no!' — never a sentence.","3","Lifts her arm when asked and lowers it again on request.","6"),
+C("21M, head clash at rugby.",E4a,"4","Talks in sentences and knows his name, but not the ground he is at or the day.","4",M6a,"6"),
+C("55M, ICU day 2 after TBI; propofol stopped 30 min ago for a wake-up test.",E2a,"2",VT,"NT",M4a,"4",{e:"Sedation is an interfering factor; the authors' answer is a wake-up test. With sedation paused, rate what you see and document when it was stopped.",v:"Intubated → verbal NT."}),
+C("39F, both eyes padded after chemical burns.","Both eyes covered by dressings that must not be removed.","NT",V5b,"5",M6b,"6",{e:"Eye opening cannot be observed → NT."}),
+C("70M, speaks only Spanish; no interpreter available yet.",E4b,"4","Speaks fluently in Spanish; you cannot judge whether his answers are correct.","NT","Copies your mimed request to make a fist and then open the hand.","6",{v:"A language barrier interferes with communication. The fix is to adapt (interpreter, written questions) and then rate. Until then record NT rather than guessing.",m:"Requests can be given by gesture; a two-part response → M6."}),
+C("18F, passenger in a high-speed MVC.",E1a,"1","Moans during pressure only.","2",M5b,"5"),
+C("52M, post-arrest, off sedation for 12 h, still intubated.",E3b,"3",VT,"NT",M6a,"6",{v:"Intubated → verbal NT. The eye and motor trend remains useful."}),
+C("74F, COPD exacerbation, PaCO₂ 11 kPa.",E2b,"2","Mutters 'tired… no…'","3","Does not respond to requests. Keeps reaching up and pulling the mask off her face.","5",{m:"Hand brought above the clavicle to a stimulus on the face → localising."}),
+C("30M, MDMA at a festival, temperature 40.5 °C.",E4b,"4","Shouts in sentences; has no idea where he is.","4","Ignores every request. Trapezius pinch: grabs your hand at his shoulder.","5"),
+C("65M, Parkinson's disease, fall at home.",E4a,"4","Quiet voice; name, place and date all correct.","5","Slowly but correctly raises an arm and then opens and closes the hand on request.","6",{m:"Slow is still obeying. Rate the response, not its speed."}),
+C("27F, fall from a third-floor balcony; intubated, no sedation or paralytic on board.",E1a,"1",VT,"NT",M2b,"2",{v:"Intubated → verbal NT."}),
+C("84M, found in his garden in winter, core temp 30 °C.",E2a,"2",V1a,"1",M4b,"4"),
+C("41F, sudden collapse with left-sided weakness.",E3a,"3","Slurred speech, but name, place and month are correct.","5","Right hand squeezes and releases on request. Left arm does not move.","6",{v:"Orientation is judged on content. Slurring with correct answers is still orientated.",m:"Best side → M6. Record the focal deficit separately."}),
+C("56M, bicycle crash, helmet cracked.",E4a,"4","Keeps asking 'what happened?' in sentences; gives the wrong month.","4",M6c,"6",{v:"Name and place right but month wrong is still 'confused'."}),
+C("23M, stab wound to the neck, hypotensive.",E3b,"3",V2a,"2",M4a,"4"),
+C("78F, urosepsis.",E4b,"4","Tells you her name in a full sentence; thinks she is in a hotel.","4",M6a,"6"),
+C("34M, cyclist struck by a car, no helmet.",E2a,"2","Says 'leg… leg…' only.","3",M4b,"4"),
+C("60F, acute liver failure.",E3b,"3","Groans; nothing intelligible.","2",M5a,"5"),
+C("45M, carbon monoxide exposure in a garage.",E3a,"3","Speaks in sentences; unsure of the date and where he is.","4",M6b,"6"),
+C("88M, massive intracerebral haemorrhage.",E1a,"1",V1a,"1",M1a,"1"),
+C("32F, assault; left periorbital haematoma.","Left eye swollen shut. Right eye closed, opens when you speak to her.","3",V5a,"5",M6a,"6",{e:"The right eye can still open, so the component is testable → E3. NT applies only when eye opening cannot occur."}),
+C("50M, fall from a ladder, heavy drinker.",E2b,"2",V2a,"2",M3a,"3"),
+C("16M, skateboard fall, no helmet.",E4a,"4","Says 'my head really hurts' in sentences; cannot tell you where he is.","4",M6b,"6"),
+C("67F, TBI day 3, intubated, sedation off since yesterday.",E3a,"3",VT,"NT",M5b,"5",{v:"Intubated → verbal NT; report E3 V-NT M5, no total."}),
+C("25M, motorcycle crash, femur fracture.",E4b,"4","Swearing about the pain in full sentences; name, place and date correct.","5","Makes a fist and then opens the hand on request.","6"),
+C("72M, lobar pneumonia, SpO₂ 84%.",E3a,"3","Sentences, but thinks he is on a ship.","4","Does not do what you ask. Keeps lifting a hand to pull at the oxygen mask.","5"),
+C("43F, found hanging by family.",E1a,"1",V1a,"1",M2a,"2"),
+C("37M, fell during a seizure.",E3b,"3","Says 'what… no…' — single words.","3",M4a,"4"),
+C("81F, chronic subdural, increasingly drowsy.",E3a,"3","Chats in sentences; says it is 1975.","4",M6a,"6"),
+C("20F, assault, nasal fracture, nasopharyngeal airway in place.",E4a,"4","Muffled voice; name, place and date correct.","5",M6c,"6",{v:"A nasopharyngeal airway does not stop speech. Rate what you hear."}),
+C("57M, cerebellar stroke, vomiting.",E4b,"4","Dysarthric, but gives name, hospital and month correctly.","5",M6b,"6",{v:"Dysarthria changes articulation, not content. Correct answers → orientated."}),
+C("46F, diabetic ketoacidosis.",E3a,"3","Answers in sentences; gets the month wrong.","4",M6a,"6"),
+C("90M, on the floor for over 24 h.",E2a,"2","Says 'water… water…'","3",M5a,"5"),
+C("33F, struck by a train; intubated, paralytic 3 h ago with train-of-four now 4/4, no sedation.",E1a,"1",VT,"NT",M3b,"3",{v:"Intubated → verbal NT.",m:"Paralytic has worn off (train-of-four 4/4), so the motor response can be rated."}),
+C("51M, alcohol withdrawal.",E4b,"4","Describes spiders on the wall in full sentences; does not know where he is.","4",M6b,"6"),
+C("69F, bacterial meningitis.",E2b,"2",V2a,"2",M5b,"5"),
+C("27M, quad bike roll-over.",E3a,"3",V5a,"5",M6a,"6"),
+C("85M, anticoagulated, fall at home.",E1a,"1","Groans during pressure.","2",NC+"Fingertip pressure: the left arm straightens at the elbow; the right elbow bends briskly and the arm pulls out from the body.","4",{m:"Best side → normal flexion (4). Document the asymmetry."}),
+C("42F, benzodiazepine overdose.",E3b,"3","Slurred single words.","3","Weakly squeezes your hand and then lets go when asked.","6",{m:"A weak but correct two-part response is still obeying."}),
+C("31M, roofer, fell 6 m onto concrete.",E1a,"1",V1a,"1",M3a,"3"),
+C("76F, sodium 112 mmol/L.",E4a,"4","Talks in sentences; thinks you are her niece and that she is at home.","4",M5a,"5"),
+C("63M, cirrhosis with hepatic encephalopathy.",E3a,"3","Says 'home… wife…' only.","3",M6a,"6"),
+C("24M, punched once outside a club.",E4a,"4","Asks the same question over and over; gives the wrong day and month.","4",M6c,"6"),
+C("58F, basilar artery occlusion.",E1a,"1",V1a,"1",M2b,"2"),
+C("14M, fall from a tree.",E3a,"3","Crying; says 'mum' and 'ow' only.","3",M5b,"5"),
+C("73M, post-craniotomy, sedation weaned off, still intubated.",E3a,"3",VT,"NT",M6b,"6",{v:"Intubated → verbal NT."}),
+C("48M, pedestrian, open skull fracture.",E2a,"2",V2a,"2",M3b,"3"),
+C("66F, septic shock.",E2b,"2",V2a,"2",M4a,"4"),
+C("29F, kicked in the head by a horse.",E3b,"3","Sentences; thinks it is last year and that she is at the stables.","4",M5a,"5"),
+C("83M, aspiration pneumonia on high-flow oxygen.",E4b,"4","Says 'yes… no… help…' only.","3",M6a,"6"),
+C("44M, drunk, hit by a car.",E3b,"3","Swear words only; no sentences.","3","Ignores most requests, but once clearly squeezes and then releases your hand when asked.","6",{m:"Assign the highest response observed: one clear two-part response → M6."}),
+C("19F, hanging with cardiac arrest, ROSC; intubated, no sedation, no paralytic for 8 h.",E1a,"1",VT,"NT",M1a,"1",{v:"Intubated → verbal NT."}),
+C("60M, missed dialysis, urea 48 mmol/L.",E3a,"3","Sentences; wrong year and wrong place.","4",M6b,"6"),
+C("32M, jumped from a bridge.",E1a,"1",V1a,"1",M4a,"4"),
+C("26F, cyclist with extensive facial injuries; intubated, no paralytic or sedation on board.","Both eyes swollen completely shut.","NT",VT,"NT",M5b,"5",{e:"Closed by a local factor → NT.",v:"Intubated → NT. Report E-NT V-NT M5; the motor trend still guides care."}),
+C("53F, post-ictal after status epilepticus.",E1a,"1","Groans during pressure.","2",M4b,"4"),
+C("79M, pontine haemorrhage.",E1a,"1",V1a,"1",M1a,"1"),
+C("22M, fell from a bunk bed after heavy drinking.",E4a,"4","Laughing, full sentences; says he is in a nightclub.","4",M6c,"6",{v:"Rated as confused whatever the cause. Record the alcohol; do not correct the score for it."}),
+C("67M, post-arrest, intubated, no sedation.",E1a,"1",VT,"NT",M3a,"3",{v:"Intubated → verbal NT."}),
+C("88F, sepsis, hypotensive.",E3b,"3",V2a,"2",M5a,"5"),
+C("41M, kicked while on the ground.",E2a,"2","Says 'stop… stop…'","3",NC+"Trapezius pinch: the left arm straightens at the elbow; the right elbow bends quickly, arm moving away from the body, hand staying below the clavicle.","4",{m:"Best side → normal flexion (4)."}),
+C("55F, right basal ganglia haemorrhage, dense left hemiplegia.",E3a,"3","Sentences; wrong month, thinks she is at work.","4","Does not respond to requests. Supraorbital pressure: the right hand comes up to the brow; the left arm does not move.","5",{m:"Best side → localising (5). Hemiplegia does not lower the rating."}),
+C("18M, fell off a motorbike, helmeted.",E4b,"4","Keeps saying 'bike… bike…' — no sentences.","3",M6b,"6"),
+C("64M, chronic alcohol use, ataxic.",E4a,"4","Tells detailed stories in full sentences; gives a year two decades out.","4",M6a,"6"),
+C("30F, MVC, trapped for 40 min.",E2b,"2",V2a,"2",M5a,"5"),
+C("74M, aortic dissection, collapsed.",E1a,"1",V1a,"1",NC+"Trapezius pinch: the right elbow bends slowly with the forearm across the chest and thumb clenched; the left arm straightens.","3",{m:"Best side → abnormal flexion (3)."}),
+C("50F, tracheostomy and ventilation, sedation off for 24 h.",E2a,"2","Tracheostomy; no voice possible.","NT",M4b,"4",{v:"Tracheostomy → verbal NT."}),
+C("36M, fall at a climbing wall.",E3a,"3","Gives his name and the hospital correctly in sentences but says it is March (it is November).","4",M6a,"6",{v:"One wrong answer — here the month — is enough for 'confused'."})
+];
+
+// Q(question, [options], correctIndex, explanation, source)
+const QUIZ=[
+Q("What is the order of the structured GCS assessment?",["Observe → Check → Rate → Stimulate","Check → Observe → Stimulate → Rate","Stimulate → Observe → Check → Rate","Rate → Check → Observe → Stimulate"],1,"Check for interfering factors, observe spontaneous behaviour, stimulate (sound, then pressure), then rate the highest response seen.","GCS aid"),
+Q("How many steps does each component have?",["E3, V5, M6","E4, V5, M6","E4, V4, M6","E4, V5, M5"],1,"Eyes 4, verbal 5, motor 6. The possible sum runs from 3 to 15.","GCS site"),
+Q("In what order are the physical stimuli applied?",["Sternal rub → trapezius → fingertip","Supraorbital notch → fingertip → trapezius","Fingertip → trapezius pinch → supraorbital notch","Trapezius → jaw angle → sternum"],2,"Fingertip pressure first, then the central sites: trapezius pinch, then supraorbital notch.","GCS aid"),
+Q("Which stimulus do the GCS authors strongly discourage?",["Fingertip pressure","Trapezius pinch","Supraorbital notch pressure","Sternal rub"],3,"Knuckle rubbing on the sternum can bruise and gives responses that are hard to interpret. Pressure behind the jaw is also not recommended for routine use.","GCS site"),
+Q("Eyes are closed and open when you say 'open your eyes'. Rating?",["Spontaneous (E4)","To sound (E3)","To pressure (E2)","Not testable"],1,"Opening after a spoken or shouted request is 'to sound'.","GCS aid"),
+Q("A patient gives name and place correctly but the wrong month. Rating?",["Orientated (V5)","Confused (V4)","Words (V3)","Not testable"],1,"Any incorrect answer, even only the month, means confused, whatever the cause.","GCS self-test"),
+Q("How is the verbal response recorded in an intubated patient?",["1","1T","NT (not testable)","Estimated from the motor score"],2,"Record NT. A missing component must not be recorded as 1.","GCS FAQ"),
+Q("One component is NT. What do you report?",["The sum, counting NT as 1","The sum of the other two only","The three components, with no total","An average of earlier totals"],2,"A total with a missing component looks falsely low. Use and trend the components that can be tested.","GCS FAQ"),
+Q("Which response defines 'localising' (M5)?",["Any purposeful limb movement","Hand brought above the clavicle to a stimulus on the head or neck","Arm pulled away from fingertip pressure","Hand grips the examiner's fingers"],1,"After trapezius pinch or supraorbital pressure, the hand must rise above the clavicle.","GCS aid"),
+Q("Which is a feature of NORMAL rather than abnormal flexion?",["Slow, stereotyped movement","Forearm rotates, thumb clenched","Rapid movement, arm moves away from the body","Arm drawn across the chest, leg extends"],2,"Normal flexion is rapid and variable with the arm moving away from the body. The other features describe abnormal flexion.","GCS aid"),
+Q("Right arm localises; left arm extends. Motor rating?",["M2","M3 (average)","M5","Not testable"],2,"Rate the best response; localising is less impaired than extension. Note the asymmetry separately.","GCS self-test"),
+Q("A tetraplegic patient sticks out the tongue and looks left then right on request. Motor rating?",["M1","M6","NT","M5"],1,"With spinal cord damage, adapt the exam to tongue and eye movements. A two-part request is obeyed.","GCS FAQ"),
+Q("A ventilated patient is sedated and paralysed. How do the GCS authors suggest getting an assessment?",["Score every component 1","Temporarily reverse or pause the drugs (wake-up test)","Use a sternal rub","Add 2 points for sedation"],1,"Sedation and paralysis are interfering factors; a wake-up test addresses them. Components that still cannot be tested are NT.","GCS FAQ"),
+Q("Summed GCS 10 after head injury is conventionally classed as:",["Mild","Moderate","Severe","Unclassifiable"],1,"13–15 mild, 9–12 moderate, 8 or less severe.","ACS TBI guideline 2024"),
+Q("GCS E1 V1 M4 with both pupils unreactive. GCS-P?",["6","5","4","8"],2,"GCS-P = GCS sum minus the number of unreactive pupils: 6 − 2 = 4.","GCS-P page"),
+Q("What is the range of the GCS-P?",["0–15","1–15","3–15","3–17"],1,"Sum 3–15 minus a pupil reactivity score of 0–2 gives 1–15.","GCS-P page"),
+Q("In the 2021 US field triage guideline, which mental-status finding is a RED criterion?",["GCS sum ≤ 13","Unable to follow commands (motor GCS < 6)","Verbal score < 5","Any loss of consciousness"],1,"The 2021 revision replaced the summed-GCS threshold with the motor component.","Field triage 2021"),
+Q("ACS 2024: ICP monitoring is recommended for which patients?",["All with GCS < 15","GCS ≤ 8 with structural damage on the initial CT","GCS ≤ 12 regardless of CT","Only those with unreactive pupils"],1,"Comatose patients (GCS 8 or less) with structural brain damage on CT; others case by case.","ACS TBI guideline 2024"),
+Q("When describing an individual patient, what should be reported?",["The sum only","Each of the three components","Motor score only","Sum plus AVPU"],1,"Components for individual patients; the sum is for group comparison and classification.","ACS TBI guideline 2024"),
+Q("ACS 2024: which limbs are used to rate the motor response?",["Best arm only","Best leg only","Worst arm","Average of all four limbs"],0,"Document the best upper-limb response; leg responses are not recorded for the motor rating.","ACS TBI guideline 2024"),
+Q("Both eyes are swollen shut after facial trauma. Eye rating?",["1","2","NT","4"],2,"A local factor prevents opening → not testable.","GCS self-test"),
+Q("Per the GCS authors, the standard scale can be used unchanged in children older than:",["1 year","2 years","5 years","12 years"],2,"Under 5, 'orientated' and 'obeys commands' are usually not assessable and a paediatric scale is used. The ACS guideline notes the paediatric GCS is more reliable for ages 0–2.","GCS FAQ"),
+Q("A patient speaks a language you do not share. Best approach to the verbal component?",["Score V1","Score V4","Adapt: interpreter, appropriate examiner or written questions","Skip the GCS"],2,"Language and cultural differences are interfering factors to be worked around, not scored down.","GCS FAQ"),
+Q("A change in which component calls for the fastest response?",["Eye","Verbal","Motor","All equal"],2,"Motor changes are weighted most heavily when judging deterioration.","GCS FAQ"),
+Q("Which are the four pillars of the 2025 NIH-NINDS CBI-M framework?",["Clinical, Biomarker, Imaging, Modifiers","Coma, Breathing, ICP, Motor","CT, Blood, Intubation, Monitoring","Clinical, Brainstem, Injury, Mechanism"],0,"The clinical pillar is the full GCS plus pupillary reactivity. The framework is meant to move beyond mild/moderate/severe labels.","Lancet Neurol 2025"),
+Q("Why does the 2014 update say 'to pressure' instead of 'to pain'?",["Pain is no longer applied","It names the stimulus actually used","Pain responses are unreliable in children only","To match the AVPU scale"],1,"The term reflects the stimulus applied and doubts about pain as a concept in coma.","GCS site"),
+Q("ATLS teaching: a summed GCS of 8 or less usually indicates the need for:",["Observation only","Repeat GCS in 4 hours","A definitive airway","Immediate burr holes"],2,"Severe head injury with GCS 8 or less usually requires a cuffed, secured tracheal tube.","ATLS"),
+Q("ACS 2024: with suspected TBI, which finding means transport to the highest-level trauma centre?",["Motor score < 6 or GCS sum < 13","Only GCS sum ≤ 8","Verbal score < 5 alone","Any headache"],0,"Either the motor criterion or a sum below 13.","ACS TBI guideline 2024"),
+Q("A patient grips your fingers when you touch the palm but never lets go when asked. This is:",["Obeying commands (M6)","Not proof of obeying — it may be a grasp reflex","Localising (M5)","Abnormal flexion"],1,"M6 needs a two-part request, such as squeeze and release.","GCS aid"),
+Q("How does the 2025 NINDS clinical working group want pupil reactivity recorded?",["Only as a combined GCS-P","Separately from the GCS, in all patients","Only when GCS ≤ 8","Not at all"],1,"Document pupils in every patient, alongside rather than merged into the GCS.","J Neurotrauma 2025")
+];
+
+const LABEL={E:{4:"Spontaneous",3:"To sound",2:"To pressure",1:"None",NT:"Not testable"},
+ V:{5:"Orientated",4:"Confused",3:"Words",2:"Sounds",1:"None",NT:"Not testable"},
+ M:{6:"Obeys commands",5:"Localising",4:"Normal flexion",3:"Abnormal flexion",2:"Extension",1:"None",NT:"Not testable"}};
+const EXP={
+ E:{4:"Open before any stimulus → spontaneous.",3:"Opens after a spoken or shouted request → to sound.",2:"Opens only after fingertip pressure → to pressure.",1:"No opening at any time and no interfering factor → none.",NT:"Closed by a local factor → not testable."},
+ V:{5:"Name, place and date all correct → orientated.",4:"Communicates coherently but not orientated → confused.",3:"Intelligible single words only → words.",2:"Only moans or groans → sounds.",1:"No audible response and no interfering factor → none.",NT:"A factor interferes with communication → not testable."},
+ M:{6:"Obeys a two-part request → obeys commands.",5:"Hand brought above the clavicle to a stimulus on the head/neck → localising.",4:"Elbow bends rapidly, arm away from body, hand stays below the clavicle → normal flexion.",3:"Slow, stereotyped bending with arm across chest, forearm rotation, clenched thumb or leg extension → abnormal flexion.",2:"Arm extends at the elbow → extension.",1:"No movement in arms or legs and no interfering factor → none.",NT:"Paralysed or other limiting factor → not testable."}};
+const NAME={E:"Eye",V:"Verbal",M:"Motor"};
+const KEYS=["E","V","M"];
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+let mode="full",deck=[],pos=0,cur=null,ans={},done=true,tUsed=0,tStart=0,tLimit=0,tInt=null,autoT=null,paused=false;
+let st;
+function resetStats(){st={n:0,p:0,s:0,c:{E:[0,0],V:[0,0],M:[0,0],Q:[0,0]},t:[],miss:{},missed:{full:new Set(),single:new Set(),quiz:new Set()}};}
+resetStats();
+const SKEY="gcs-trainer-v1";
+function save(){try{localStorage.setItem(SKEY,JSON.stringify({...st,missed:{full:[...st.missed.full],single:[...st.missed.single],quiz:[...st.missed.quiz]}}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(SKEY));if(!d||!d.c||!d.missed)return;st={n:d.n|0,p:d.p|0,s:d.s|0,c:d.c,t:d.t||[],miss:d.miss||{},missed:{full:new Set(d.missed.full),single:new Set(d.missed.single),quiz:new Set(d.missed.quiz)}};}catch(e){}}
+load();
+
+function pool(){
+  if(mode==="full")return CASES.map((c,i)=>({id:"c"+i,i,keys:KEYS,edge:c.edge}));
+  if(mode==="single")return CASES.flatMap((c,i)=>KEYS.map(k=>({id:"s"+i+k,i,keys:[k],edge:!!c.items[k][2]||c.items[k][1]==="NT"})));
+  return QUIZ.map((q,i)=>({id:"q"+i,qi:i,edge:true}));
+}
+function buildDeck(){
+  const f=$("fsel").value;let p=pool();
+  if(f==="edge")p=p.filter(x=>x.edge);
+  if(f==="miss")p=p.filter(x=>st.missed[mode].has(x.id));
+  deck=shuffle(p);
+  if(mode==="single"&&f==="all")deck=deck.slice(0,100);
+  pos=0;
+}
+function start(){buildDeck();nextItem();}
+
+function nextItem(){
+  clearTimers();
+  if(!deck.length){showDone(true);return;}
+  if(pos>=deck.length){showDone(false);return;}
+  $("caseCard").classList.remove("hidden");$("doneCard").classList.add("hidden");
+  cur=deck[pos];done=false;ans={};paused=false;
+  $("num").textContent=`${pos+1} / ${deck.length}`;
+  if(mode==="quiz"){
+    const q=QUIZ[cur.qi];
+    $("pt").textContent="Rules and guideline knowledge";
+    $("vig").innerHTML=`<p class="qq">${q.q}</p>`;
+    $("comps").innerHTML=`<div class="comp"><div class="opts q">`+shuffle(q.o.map((t,i)=>[t,i])).map(([t,i])=>`<button class="opt" data-k="Q" data-v="${i}">${t}</button>`).join("")+`</div></div>`;
+  }else{
+    const c=CASES[cur.i];
+    $("pt").textContent=c.p;
+    $("vig").innerHTML=cur.keys.map(k=>`<p><span class="tag">${NAME[k].toUpperCase()}</span>${c.items[k][0]}</p>`).join("");
+    $("comps").innerHTML=cur.keys.map(k=>{
+      const opts=Object.keys(LABEL[k]).sort((a,b)=>a==="NT"?1:b==="NT"?-1:b-a);
+      return `<div class="comp"><h3>${NAME[k]} (${k})</h3><div class="opts">`+
+        opts.map(v=>`<button class="opt" data-k="${k}" data-v="${v}"><b>${v==="NT"?"NT":k+v}</b> ${LABEL[k][v]}</button>`).join("")+`</div></div>`;
+    }).join("");
+  }
+  $("fb").innerHTML="";
+  $("submit").disabled=true;$("submit").classList.remove("hidden");$("next").classList.add("hidden");
+  const need=mode==="quiz"?["Q"]:cur.keys;
+  document.querySelectorAll("#comps .opt").forEach(b=>b.onclick=()=>{
+    if(done)return;
+    const k=b.dataset.k;ans[k]=b.dataset.v;
+    document.querySelectorAll(`#comps .opt[data-k="${k}"]`).forEach(x=>x.classList.toggle("sel",x===b));
+    $("submit").disabled=need.some(k=>ans[k]==null);
+  });
+  tUsed=0;startTimer();
+}
+
+function startTimer(){
+  tStart=performance.now();
+  tLimit=+$("tsel").value;
+  $("timerWrap").classList.toggle("hidden",!tLimit);
+  if(!tLimit)return;
+  const tick=()=>{
+    const left=Math.max(0,tLimit-elapsed());
+    $("tbar").style.width=(100*left/tLimit)+"%";
+    $("timer").classList.toggle("low",left<=tLimit*0.25);
+    $("tleft").textContent=left.toFixed(1)+" s";
+    if(left<=0){clearTimers();check(true);}
+  };
+  tick();tInt=setInterval(tick,100);
+}
+const elapsed=()=>tUsed+(paused?0:(performance.now()-tStart)/1000);
+function pauseTimer(){if(done||paused)return;tUsed=elapsed();paused=true;clearInterval(tInt);tInt=null;}
+function resumeTimer(){if(done||!paused)return;paused=false;startTimer();}
+function clearTimers(){clearInterval(tInt);tInt=null;clearTimeout(autoT);autoT=null;}
+
+const fmt=(k,v)=>v==null?"—":v==="NT"?k+"-NT":k+v;
+function mark(k,truth){
+  document.querySelectorAll(`#comps .opt[data-k="${k}"]`).forEach(x=>{
+    x.disabled=true;x.classList.remove("sel");
+    if(x.dataset.v===String(truth))x.classList.add("right");
+    else if(x.dataset.v===ans[k])x.classList.add("wrong");
+  });
+}
+
+function check(timedOut){
+  if(done)return;
+  const secs=elapsed();
+  clearTimers();done=true;st.t.push(secs);
+  let all=true,body="";
+  if(mode==="quiz"){
+    const q=QUIZ[cur.qi];all=ans.Q===String(q.a);
+    st.c.Q[1]++;if(all)st.c.Q[0]++;
+    mark("Q",q.a);
+    body=`<div><b>${all?"✓ Correct":"✗ "+q.o[q.a]}</b></div><div style="margin-top:4px">${q.x}</div><div class="small" style="margin-top:4px">Source: ${q.s}</div>`;
+  }else{
+    const c=CASES[cur.i],lines=[];
+    cur.keys.forEach(k=>{
+      const [,truth,note]=c.items[k],ok=ans[k]===truth;all=all&&ok;
+      st.c[k][1]++;if(ok)st.c[k][0]++;else{const key=k+":"+truth;st.miss[key]=(st.miss[key]||0)+1;}
+      mark(k,truth);
+      lines.push(`<li>${ok?"✓":"✗"} <b>${NAME[k]}: ${fmt(k,truth)} ${LABEL[k][truth]}</b>${ok?"":` (you: ${fmt(k,ans[k])})`} — ${note||EXP[k][truth]}</li>`);
+    });
+    let tot="";
+    if(cur.keys.length===3){
+      const v=KEYS.map(k=>c.items[k][1]),comp=KEYS.map(k=>fmt(k,c.items[k][1])).join(" ");
+      if(v.includes("NT"))tot=`<div class="total">${comp}</div><div class="small">A component is not testable → report components only; no total.</div>`;
+      else{const s=v.reduce((a,b)=>a+ +b,0),sev=s>=13?"mild":s>=9?"moderate":"severe";
+        tot=`<div class="total">${comp} · sum ${s}</div><div class="small">Conventional band: ${sev}.${s<=8?" ≤8: definitive airway usually needed (ATLS).":""}${+c.items.M[1]<6?" Motor <6 meets the 2021 field-triage red criterion.":""}</div>`;}
+    }
+    body=`${tot}<ul>${lines.join("")}</ul>`;
+  }
+  st.n++;if(all){st.p++;st.s++;st.missed[mode].delete(cur.id);}else{st.s=0;st.missed[mode].add(cur.id);}
+  $("fb").innerHTML=`<div class="fb ${all?"ok":"bad"}">${body}<div class="small" style="margin-top:6px">${timedOut?'<span class="tout">Time’s up.</span> ':""}${secs.toFixed(1)} s</div></div>`;
+  $("submit").classList.add("hidden");$("next").classList.remove("hidden");
+  pos++;stats();save();
+  if($("auto").checked)autoT=setTimeout(nextItem,all?1500:5000);
+}
+
+const pct=([c,t])=>t?Math.round(100*c/t)+"%":"–";
+function stats(){
+  $("sN").textContent=st.n;$("sP").textContent=st.n?Math.round(100*st.p/st.n)+"%":"–";$("sS").textContent=st.s;
+  KEYS.forEach(k=>$("a"+k).textContent=pct(st.c[k]));$("aQ").textContent=pct(st.c.Q);
+  $("aT").textContent=st.t.length?(st.t.reduce((a,b)=>a+b,0)/st.t.length).toFixed(1)+" s":"–";
+  const m=Object.entries(st.miss).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const nm=st.missed.full.size+st.missed.single.size+st.missed.quiz.size;
+  $("weak").textContent=(m.length?"Most missed: "+m.map(([k,n])=>{const[c,v]=k.split(":");return `${fmt(c,v)} ${LABEL[c][v]} (${n})`;}).join(" · ")+". ":"")+(nm?`${nm} item${nm>1?"s":""} in the missed deck.`:"");
+}
+
+function showDone(empty){
+  $("caseCard").classList.add("hidden");$("doneCard").classList.remove("hidden");
+  const f=$("fsel").value;
+  $("dTitle").textContent=empty?(f==="miss"?"Nothing in the missed deck for this mode.":"No items in this deck."):`Deck complete (${deck.length} items)`;
+  $("dScore").textContent=empty?"✓":(st.n?Math.round(100*st.p/st.n)+"%":"–");
+  $("dDetail").textContent=`Session: ${st.p}/${st.n} correct · E ${pct(st.c.E)} · V ${pct(st.c.V)} · M ${pct(st.c.M)} · Rules ${pct(st.c.Q)}`;
+  $("revBtn").classList.toggle("hidden",!st.missed[mode].size);
+}
+
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
+  const m=t.dataset.mode;
+  $("ref").classList.toggle("hidden",m!=="ref");$("train").classList.toggle("hidden",m==="ref");
+  if(m==="ref"){pauseTimer();return;}
+  if(m!==mode){mode=m;start();}else resumeTimer();
+});
+$("submit").onclick=()=>check(false);
+$("next").onclick=nextItem;
+$("again").onclick=()=>{$("fsel").value="all";start();};
+$("revBtn").onclick=()=>{$("fsel").value="miss";start();};
+$("reset").onclick=()=>{resetStats();save();stats();$("fsel").value="all";start();};
+$("fsel").onchange=start;
+$("tsel").onchange=()=>{if(!done&&!paused){clearTimers();tUsed=0;startTimer();}};
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||$("train").classList.contains("hidden")||$("caseCard").classList.contains("hidden"))return;
+  if(!done&&!$("submit").disabled)check(false);else if(done)nextItem();
+});
+stats();start();
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
